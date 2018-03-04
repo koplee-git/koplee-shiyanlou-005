@@ -1,8 +1,8 @@
 from flask import Blueprint, render_template, request, current_app, redirect, url_for, flash
 from simpledu.decorators import admin_required
-from simpledu.models import Course,User
+from simpledu.models import Course,User,db
 from simpledu.forms import CourseForm, RegisterForm
-
+from flask_login import current_user
 admin = Blueprint('admin', __name__, url_prefix='/admin')
 
 
@@ -32,7 +32,8 @@ def user():
         per_page=current_app.config['ADMIN_PER_PAGE'],
         error_out=False
     )
-    return render_template('admin/courses.html', pagination=pagination)
+    return render_template('admin/user.html', pagination=pagination)
+
 @admin.route('/courses/create', methods=['GET', 'POST'])
 @admin_required
 def create_course():
@@ -42,7 +43,9 @@ def create_course():
         flash('课程创建成功', 'success')
         return redirect(url_for('admin.courses'))
     return render_template('admin/create_course.html', form=form)
+
 @admin.route('/user/create',methods=['GET','POST'])
+@admin_required
 def create_user():
     form =  RegisterForm()
     if form.validate_on_submit():
@@ -61,13 +64,35 @@ def edit_course(course_id):
         flash('课程更新成功', 'success')
         return redirect(url_for('admin.courses'))
     return render_template('admin/edit_course.html', form=form, course=course)
-@admin.route('/courses/<int:user_id>/edit', methods=['GET', 'POST'])
+@admin.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
 @admin_required
 def edit_user(user_id):
-    user = User.query.get_or_404(course_id)
+    user = User.query.get_or_404(user_id)
     form =RegisterForm(obj=user)
     if form.validate_on_submit():
         form.update_user(user)
         flash('用户更新成功', 'success')
         return redirect(url_for('admin.user'))
     return render_template('admin/edit_user.html', form=form, user=user)
+
+@admin.route('/courses/<int:course_id>/delete',methods=['GET','POST'])
+@admin_required
+def delete_course(course_id):
+    course = Course.query.get_or_404(course_id)
+    db.session.delete(course)
+    db.session.commit()
+    flash('课程删除成功','success')
+    return redirect(url_for('admin.courses'))
+
+@admin.route('/user/<int:user_id>/delete',methods=['GET','POST'])
+@admin_required
+def delete_user(user_id):
+    if current_user.id == user_id:
+        flash('不能删除自己','success')
+        return redirect(url_for('admin.user'))
+    user = Course.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash('不能删除自己','success')
+    return redirect(url_for('admin.user'))
+

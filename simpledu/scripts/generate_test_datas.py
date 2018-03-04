@@ -18,8 +18,9 @@ def iter_users():
 
 def iter_courses():
     author = User.query.filter_by(username='Jack Lee').first()
-    with open(os.path.join(os.path.dirname(__file__), '..', 'datas', 'courses.json')) as f:
-        courses = json.load(f)
+    with open(os.path.join(os.path.dirname(__file__), '..', 'datas', 'courses.json'),'r') as f:
+        print(type(f))
+        courses = json.loads(f.read())
     for course in courses:
         yield Course(
             name=course['name'],
@@ -27,7 +28,11 @@ def iter_courses():
             image_url=course['image_url'],
             author=author,
         )
-
+        
+def iter_test():
+     with open(os.path.join(os.path.dirname(__file__), '..', 'datas', 'courses.json'),'r') as f:
+        j = json.loads(f.read())
+        print(j)
 
 def iter_chapters():
     for course in Course.query:
