@@ -96,3 +96,7 @@ def delete_user(user_id):
     flash('不能删除自己','success')
     return redirect(url_for('admin.user'))
 
+@admin.route('/live',methods=['GET','POST'])
+@admin_required
+def live():
+    pass

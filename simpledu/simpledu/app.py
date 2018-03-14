@@ -3,6 +3,7 @@ from flask_migrate import Migrate
 from simpledu.config import configs
 from simpledu.models import db, User
 from flask_login import LoginManager
+from flask_sockets import Sockets
 
 
 def register_extensions(app):
@@ -20,11 +21,14 @@ def register_extensions(app):
 
 
 def register_blueprints(app):
-    from .handlers import front, course, admin
+    from .handlers import front, course, admin,ws,live
     app.register_blueprint(front)
     app.register_blueprint(course)
     app.register_blueprint(admin)
+    app.register_blueprint(live)
+    sockets = Sockets(app)
 
+    sockets.register_blueprint(ws)
 
 def create_app(config):
     app = Flask(__name__)
